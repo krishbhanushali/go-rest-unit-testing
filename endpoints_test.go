@@ -46,7 +46,7 @@ func TestGetEntryByID(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	expected := `{"id":1,"first_name":"Krish","last_name":"Bhanushali","email_address":"krishsb2405@gmail.com","phone_number":"6264648201"}`
+	expected := `{"id":1,"first_name":"Krish","last_name":"Bhanushali","email_address":"krishsb2405@gmail.com","phone_number":"0987654321"}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
@@ -72,7 +72,7 @@ func TestGetEntryByIDNotFound(t *testing.T) {
 
 func TestCreateEntry(t *testing.T) {
 
-	var jsonStr = []byte(`{"id":2,"first_name":"xyz","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`)
+	var jsonStr = []byte(`{"id":4,"first_name":"xyz","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`)
 
 	req, err := http.NewRequest("POST", "/entry", bytes.NewBuffer(jsonStr))
 	if err != nil {
@@ -86,7 +86,7 @@ func TestCreateEntry(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	expected := `{"id":7,"first_name":"xyz","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`
+	expected := `{"id":4,"first_name":"xyz","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
@@ -95,7 +95,7 @@ func TestCreateEntry(t *testing.T) {
 
 func TestEditEntry(t *testing.T) {
 
-	var jsonStr = []byte(`{"id":7,"first_name":"xyz change","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`)
+	var jsonStr = []byte(`{"id":4,"first_name":"xyz change","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`)
 
 	req, err := http.NewRequest("PUT", "/entry", bytes.NewBuffer(jsonStr))
 	if err != nil {
@@ -109,7 +109,7 @@ func TestEditEntry(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	expected := `{"id":7,"first_name":"xyz change","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`
+	expected := `{"id":4,"first_name":"xyz change","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
@@ -121,7 +121,7 @@ func TestDeleteEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 	q := req.URL.Query()
-	q.Add("id", "2")
+	q.Add("id", "4")
 	req.URL.RawQuery = q.Encode()
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(DeleteEntry)
@@ -130,7 +130,7 @@ func TestDeleteEntry(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	expected := `{"id":2,"first_name":"xyz","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`
+	expected := `{"id":4,"first_name":"xyz change","last_name":"pqr","email_address":"xyz@pqr.com","phone_number":"1234567890"}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)

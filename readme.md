@@ -4,7 +4,7 @@
 
 1. Clone the application with git@github.com:krishsb2405/assignment.git
 
-2. Use the mySQL dump to create the database, create the tables and insert some dump data.
+2. Use the mySQL dump `sql-dump.sql` to create the database, create the tables and insert some dump data.
 
 3. Once the application is cloned and database is created, change the Connection String as per your mysql username, password and database name on line No. 20 in api.go.
 
