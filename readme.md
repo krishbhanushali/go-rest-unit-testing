@@ -22,7 +22,7 @@
     ```
 > Note: By default the port number its being run on is **12345**.
 
-## Endpoint Description
+## Endpoints Description
 
 ### Get All Entries
 
@@ -43,12 +43,12 @@
 ```JSON
     URL - *http://localhost:12345/api/entry*
     Method - POST
-    Body - (type = application/json)
+    Body - (content-type = application/json)
     {
     	"first_name":"John",
     	"last_name":"Doe",
     	"email_address":"john.doe@gmail.com",
-    	"phone_number":"1234567890",
+    	"phone_number":"1234567890"
     }
 ```
 
@@ -57,11 +57,36 @@
 ```JSON
     URL - *http://localhost:12345/api/entry*
     Method - PUT
-    Body - (type = application/json)
+    Body - (content-type = application/json)
     {
         "id":5,
     	"first_name":"John",
     	"last_name":"Doe",
-    	"email_address":"john.doe@gmail.com",
-    	"
+    	"email_address":"john.doe@gmail.com"
+    }
+```
+
+### Delete Entry
+
+```JSON
+    URL - *http://localhost:12345/api/entry?id=1*
+    Method - DELETE
+```
+
+### Import entries through CSV
+
+```JSON
+    URL - *http://localhost:12345/api/upload-entries-CSV*
+    Method - POST
+    Body - form-data
+    {
+        "csvFile": <csv-file>
+    }
+```
+
+### Download entries to CSV
+
+```JSON
+    URL - *http://localhost:12345/api/download-entries-CSV*
+    Method - GET
 ```
