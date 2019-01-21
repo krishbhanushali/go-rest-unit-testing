@@ -2,7 +2,7 @@
 
 ## How to run the application
 
-1. Clone the application with git@github.com:krishsb2405/assignment.git
+1. Clone the application with `git@github.com:krishsb2405/assignment.git`
 
 2. Use the mySQL dump `sql-dump.sql` to create the database, create the tables and insert some dump data.
 
