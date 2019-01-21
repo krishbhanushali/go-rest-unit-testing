@@ -17,6 +17,7 @@ import (
 
 var host = "http://localhost"
 var port = "12345"
+var connectionString = "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local"
 
 func main() {
 
@@ -41,7 +42,7 @@ func main() {
 // Method: GET
 // Output: JSON Encoded Entries object if found else JSON Encoded Exception.
 func GetEntries(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	db, err := sql.Open("mysql", connectionString)
 	defer db.Close()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
@@ -79,7 +80,7 @@ func GetEntries(w http.ResponseWriter, r *http.Request) {
 // Method: GET
 // Output: JSON Encoded Address Book Entry object if found else JSON Encoded Exception.
 func GetEntryByID(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	db, err := sql.Open("mysql", connectionString)
 	defer db.Close()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
@@ -124,7 +125,7 @@ func GetEntryByID(w http.ResponseWriter, r *http.Request) {
 */
 // Output: JSON Encoded Address Book Entry object if created else JSON Encoded Exception.
 func CreateEntry(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	db, err := sql.Open("mysql", connectionString)
 	defer db.Close()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
@@ -156,7 +157,7 @@ func CreateEntry(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Update Entry
+// UpdateEntry - Update Entry
 // URL : /entry
 // Method: PUT
 // Body:
@@ -171,7 +172,7 @@ func CreateEntry(w http.ResponseWriter, r *http.Request) {
 */
 // Output: JSON Encoded Address Book Entry object if updated else JSON Encoded Exception.
 func UpdateEntry(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	db, err := sql.Open("mysql", connectionString)
 	defer db.Close()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
@@ -207,7 +208,7 @@ func UpdateEntry(w http.ResponseWriter, r *http.Request) {
 // Method: DELETE
 // Output: JSON Encoded Address Book Entry object if found & deleted else JSON Encoded Exception.
 func DeleteEntry(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	db, err := sql.Open("mysql", connectionString)
 	defer db.Close()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
