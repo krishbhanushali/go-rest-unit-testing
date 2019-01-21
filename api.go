@@ -110,7 +110,7 @@ func GetEntryByID(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Create Entry
+// CreateEntry - Create Entry
 // URL : /entry
 // Method: POST
 // Body:
@@ -256,7 +256,66 @@ func DeleteEntry(w http.ResponseWriter, r *http.Request) {
 
 //UploadEntriesThroughCSV - Reads CSV, Parses the CSV and creates all the entries in the database
 func UploadEntriesThroughCSV(w http.ResponseWriter, r *http.Request) {
+	//var buf bytes.Buffer
+	file, _, err := r.FormFile("csvFile")
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Something went wrong while opening the CSV.")
+		return
+	}
+	defer file.Close()
 
+	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = 5
+	csvData, err := reader.ReadAll()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Something went wrong while parsing the CSV.")
+		return
+	}
+
+	var entry entry
+
+	for _, eachEntry := range csvData {
+		if eachEntry[1] != "first_name" {
+			entry.FirstName = eachEntry[1]
+		}
+		if eachEntry[2] != "last_name" {
+			entry.LastName = eachEntry[2]
+		}
+		if eachEntry[3] != "email_address" {
+			entry.EmailAddress = eachEntry[3]
+		}
+		if eachEntry[4] != "phone_number" {
+			entry.PhoneNumber = eachEntry[4]
+		}
+		if entry.FirstName != "" && entry.LastName != "" && entry.EmailAddress != "" && entry.PhoneNumber != "" {
+			jsonString, err := json.Marshal(entry)
+			if err != nil {
+				respondWithError(w, http.StatusBadRequest, "Something went wrong while parsing the CSV.")
+				return
+			}
+			req, err := http.NewRequest("POST", host+":"+port+"/api/entry", bytes.NewBuffer(jsonString))
+			if err != nil {
+				respondWithError(w, http.StatusBadRequest, "Something went wrong while requesting to the Creation endpoint.")
+				return
+			}
+			req.Header.Set("Content-Type", "application/json")
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				respondWithError(w, http.StatusBadRequest, "Something went wrong while requesting to the Creation endpoint.")
+				return
+			}
+			defer resp.Body.Close()
+			if resp.Status == strconv.Itoa(http.StatusBadRequest) {
+				respondWithError(w, http.StatusBadRequest, "Something went wrong while inserting.")
+				return
+			} else if resp.Status == strconv.Itoa(http.StatusInternalServerError) {
+				respondWithError(w, http.StatusInternalServerError, "Something went wrong while inserting.")
+				return
+			}
+		}
+	}
+	respondWithJSON(w, http.StatusOK, map[string]string{"success": "Upload successful"})
 }
 
 //DownloadEntriesToCSV - GetAllEntries, creates a CSV and downloads the CSV.
