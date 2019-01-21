@@ -20,3 +20,48 @@
     ```shell
         go run api.go entry.go
     ```
+> Note: By default the port number its being run on is **12345**.
+
+## Endpoint Description
+
+### Get All Entries
+
+```
+    URL - *http://localhost:12345/api/entries*
+    Method - GET
+```
+
+### Get Entry By ID
+
+```JSON
+    URL - *http://localhost:12345/api/entry?id=1*
+    Method - GET
+```
+
+### Create Entry
+
+```JSON
+    URL - *http://localhost:12345/api/entry*
+    Method - POST
+    Body - (type = application/json)
+    {
+    	"first_name":"John",
+    	"last_name":"Doe",
+    	"email_address":"john.doe@gmail.com",
+    	"phone_number":"1234567890",
+    }
+```
+
+### Update Entry
+
+```JSON
+    URL - *http://localhost:12345/api/entry*
+    Method - PUT
+    Body - (type = application/json)
+    {
+        "id":5,
+    	"first_name":"John",
+    	"last_name":"Doe",
+    	"email_address":"john.doe@gmail.com",
+    	"
+```
