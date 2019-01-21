@@ -1,49 +1,46 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
-type entry struct {
-	ID           int
-	FirstName    string
-	LastName     string
-	EmailAddress string
-	PhoneNumber  string
-}
-
-type exception struct {
-	message string
-	success bool
-}
+var host = "http://localhost"
+var port = "12345"
 
 func main() {
+
 	var router *mux.Router
 	router = mux.NewRouter().StrictSlash(true)
-	apiRouter := router.PathPrefix("/api").Subrouter()                        // /api will give access to all the API endpoints
-	apiRouter.PathPrefix("/entries").HandlerFunc(getEntries).Methods("GET")   // /api/entries returns listing all the entries
-	apiRouter.PathPrefix("/entry").HandlerFunc(getEntryByID).Methods("GET")   // GET /api/entry?id=1 returns the entry with id 1.
-	apiRouter.PathPrefix("/entry").HandlerFunc(createEntry).Methods("POST")   // POST /api/entry creates an entry
-	apiRouter.PathPrefix("/entry").HandlerFunc(updateEntry).Methods("PUT")    // PUT /api/entry updates an entry
-	apiRouter.PathPrefix("/entry").HandlerFunc(deleteEntry).Methods("DELETE") // DELETE /api/entry deletes an entry
-
+	apiRouter := router.PathPrefix("/api").Subrouter()                                               // /api will give access to all the API endpoints
+	apiRouter.PathPrefix("/entries").HandlerFunc(GetEntries).Methods("GET")                          // /api/entries returns listing all the entries
+	apiRouter.PathPrefix("/entry").HandlerFunc(GetEntryByID).Methods("GET")                          // GET /api/entry?id=1 returns the entry with id 1.
+	apiRouter.PathPrefix("/entry").HandlerFunc(CreateEntry).Methods("POST")                          // POST /api/entry creates an entry
+	apiRouter.PathPrefix("/entry").HandlerFunc(UpdateEntry).Methods("PUT")                           // PUT /api/entry updates an entry
+	apiRouter.PathPrefix("/entry").HandlerFunc(DeleteEntry).Methods("DELETE")                        // DELETE /api/entry deletes an entry
+	apiRouter.PathPrefix("/upload-entries-CSV").HandlerFunc(UploadEntriesThroughCSV).Methods("POST") // POST /api/upload-entries-CSV imports CSV into the database
+	apiRouter.PathPrefix("/download-entries-CSV").HandlerFunc(DownloadEntriesToCSV).Methods("GET")   //GET /api/download-entries-CSV exports CSV from the database
 	fmt.Println("Listening on port :12345")
-	http.ListenAndServe(":12345", router)
+	http.ListenAndServe(":"+port, router)
 
 }
 
-// Get All Entries
+// GetEntries : Get All Entries
 // URL : /entries
 // Parameters: none
 // Method: GET
 // Output: JSON Encoded Entries object if found else JSON Encoded Exception.
-func getEntries(w http.ResponseWriter, r *http.Request) {
+func GetEntries(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
 	defer db.Close()
 	if err != nil {
@@ -76,20 +73,227 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, entries)
 }
 
-func getEntryByID(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Get Entry By ID")
+// GetEntryByID - Get Entry By ID
+// URL : /entries?id=1
+// Parameters: int id
+// Method: GET
+// Output: JSON Encoded Address Book Entry object if found else JSON Encoded Exception.
+func GetEntryByID(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	defer db.Close()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
+		return
+	}
+	id := r.URL.Query().Get("id")
+	var firstName sql.NullString
+	var lastName sql.NullString
+	var emailAddress sql.NullString
+	var phoneNumber sql.NullString
+	err = db.QueryRow("SELECT first_name, last_name, email_address, phone_number from address_book where id=?", id).Scan(&firstName, &lastName, &emailAddress, &phoneNumber)
+	switch {
+	case err == sql.ErrNoRows:
+		respondWithError(w, http.StatusBadRequest, "No entry found with the id="+id)
+		return
+	case err != nil:
+		respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+		return
+	default:
+		var eachEntry entry
+		eachEntry.ID, _ = strconv.Atoi(id)
+		eachEntry.FirstName = firstName.String
+		eachEntry.LastName = lastName.String
+		eachEntry.EmailAddress = emailAddress.String
+		eachEntry.PhoneNumber = phoneNumber.String
+		respondWithJSON(w, http.StatusOK, eachEntry)
+	}
+
 }
 
-func createEntry(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("create entry")
+// Create Entry
+// URL : /entry
+// Method: POST
+// Body:
+/*
+ * {
+ *	"first_name":"John",
+ *	"last_name":"Doe",
+ *	"email_address":"john.doe@gmail.com",
+ *	"phone_number":"1234567890",
+ }
+*/
+// Output: JSON Encoded Address Book Entry object if created else JSON Encoded Exception.
+func CreateEntry(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	defer db.Close()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	var entry entry
+	err = decoder.Decode(&entry)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+		return
+	}
+	statement, err := db.Prepare("insert into address_book (first_name, last_name, email_address, phone_number) values(?,?,?,?)")
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+		return
+	}
+	defer statement.Close()
+	res, err := statement.Exec(entry.FirstName, entry.LastName, entry.EmailAddress, entry.PhoneNumber)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "There was problem entering the entry.")
+		return
+	}
+	if rowsAffected, _ := res.RowsAffected(); rowsAffected == 1 {
+		id, _ := res.LastInsertId()
+		entry.ID = int(id)
+		respondWithJSON(w, http.StatusOK, entry)
+	}
+
 }
 
-func updateEntry(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("update entry")
+// Update Entry
+// URL : /entry
+// Method: PUT
+// Body:
+/*
+ * {
+ *	"id":1,
+ *	"first_name":"Krish",
+ *	"last_name":"Bhanushali",
+ *	"email_address":"krishsb2405@gmail.com",
+ *	"phone_number":"7798775575",
+ }
+*/
+// Output: JSON Encoded Address Book Entry object if updated else JSON Encoded Exception.
+func UpdateEntry(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	defer db.Close()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	var entry entry
+	err = decoder.Decode(&entry)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+		return
+	}
+
+	statement, err := db.Prepare("update address_book set first_name=?, last_name=?, email_address=?, phone_number=? where id=?")
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+		return
+	}
+	defer statement.Close()
+	res, err := statement.Exec(entry.FirstName, entry.LastName, entry.EmailAddress, entry.PhoneNumber, entry.ID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "There was problem entering the entry.")
+		return
+	}
+	if rowsAffected, _ := res.RowsAffected(); rowsAffected == 1 {
+		respondWithJSON(w, http.StatusOK, entry)
+	}
 }
 
-func deleteEntry(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("delete entry")
+// DeleteEntry -  Delete Entry By ID
+// URL : /entries?id=1
+// Parameters: int id
+// Method: DELETE
+// Output: JSON Encoded Address Book Entry object if found & deleted else JSON Encoded Exception.
+func DeleteEntry(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/online_address_book?charset=utf8&parseTime=True&loc=Local")
+	defer db.Close()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not connect to the database")
+		return
+	}
+
+	id := r.URL.Query().Get("id")
+	var firstName sql.NullString
+	var lastName sql.NullString
+	var emailAddress sql.NullString
+	var phoneNumber sql.NullString
+	err = db.QueryRow("SELECT first_name, last_name, email_address, phone_number from address_book where id=?", id).Scan(&firstName, &lastName, &emailAddress, &phoneNumber)
+	switch {
+	case err == sql.ErrNoRows:
+		respondWithError(w, http.StatusBadRequest, "No entry found with the id="+id)
+		return
+	case err != nil:
+		respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+		return
+	default:
+
+		res, err := db.Exec("DELETE from address_book where id=?", id)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+			return
+		}
+		count, err := res.RowsAffected()
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Some problem occurred.")
+			return
+		}
+		if count == 1 {
+			var eachEntry entry
+			eachEntry.ID, _ = strconv.Atoi(id)
+			eachEntry.FirstName = firstName.String
+			eachEntry.LastName = lastName.String
+			eachEntry.EmailAddress = emailAddress.String
+			eachEntry.PhoneNumber = phoneNumber.String
+
+			respondWithJSON(w, http.StatusOK, eachEntry)
+			return
+		}
+
+	}
+}
+
+//UploadEntriesThroughCSV - Reads CSV, Parses the CSV and creates all the entries in the database
+func UploadEntriesThroughCSV(w http.ResponseWriter, r *http.Request) {
+
+}
+
+//DownloadEntriesToCSV - GetAllEntries, creates a CSV and downloads the CSV.
+func DownloadEntriesToCSV(w http.ResponseWriter, r *http.Request) {
+	response, err := http.Get(host + ":" + port + "/api/entries")
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Somehow host could not be reached.")
+		return
+	}
+	data, _ := ioutil.ReadAll(response.Body)
+	var entries []entry
+	err = json.Unmarshal(data, &entries)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Unable to unmarshal data.")
+		return
+	}
+	b := &bytes.Buffer{}
+	t := time.Now().Unix()
+	fileName := "address-book-" + strconv.FormatInt(t, 10) + ".csv"
+	writer := csv.NewWriter(b)
+	heading := []string{"id", "first_name", "last_name", "email_address", "phone_number"}
+	writer.Write(heading)
+	for _, eachEntry := range entries {
+		var record []string
+		record = append(record, strconv.Itoa(eachEntry.ID))
+		record = append(record, eachEntry.FirstName)
+		record = append(record, eachEntry.LastName)
+		record = append(record, eachEntry.EmailAddress)
+		record = append(record, eachEntry.PhoneNumber)
+		writer.Write(record)
+	}
+	writer.Flush()
+	w.Header().Set("Content-Type", "text/csv") // setting the content type header to text/csv
+	w.Header().Set("Content-Disposition", "attachment;filename="+fileName)
+	w.WriteHeader(http.StatusOK)
+	w.Write(b.Bytes())
+	return
 }
 
 // RespondWithError is called on an error to return info regarding error
