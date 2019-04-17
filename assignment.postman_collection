@@ -1,0 +1,219 @@
+{
+	"id": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+	"name": "assignment",
+	"description": "",
+	"order": [
+		"9ee13aa6-676e-a17f-561d-003ef3473e25",
+		"22e95e9f-757f-b04f-0898-c7a0fdeb8957",
+		"7f1aaf9e-c059-e9ce-767a-3b9eb61c96b2",
+		"0fb242cb-cea9-866e-0654-06c4138f391c",
+		"9f5d12d4-451c-50fb-975a-8abf5b610cc9",
+		"1e0ebdab-15a3-4ab1-3af9-6d82b75b0940",
+		"f067b75d-c06f-94d5-f880-72c30a811901"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 1547920236586,
+	"owner": "4732652",
+	"public": false,
+	"requests": [
+		{
+			"id": "0fb242cb-cea9-866e-0654-06c4138f391c",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "http://localhost:12345/api/entry",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1548056861877,
+			"name": "Update Entry: http://localhost:12345/api/entry",
+			"description": "",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"responses": [],
+			"rawModeData": "{\n\t\"id\":2,\n\t\"first_name\":\"Rick\",\n\t\"last_name\":\"Changed Surname\",\n\t\"email_address\":\"rick.parker@gmail.com\",\n\t\"phone_number\":\"1234567890\"\n}"
+		},
+		{
+			"id": "1e0ebdab-15a3-4ab1-3af9-6d82b75b0940",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:12345/api/download-entries-CSV",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"data": null,
+			"dataMode": "params",
+			"name": "Download CSV: http://localhost:12345/api/download-entries-CSV",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1548039662603,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "22e95e9f-757f-b04f-0898-c7a0fdeb8957",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:12345/api/entries",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"data": null,
+			"dataMode": "params",
+			"name": "Get All Entries: http://localhost:12345/api/entries",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1547920291208,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "7f1aaf9e-c059-e9ce-767a-3b9eb61c96b2",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "http://localhost:12345/api/entry",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1548056890771,
+			"name": "Create Entry: http://localhost:12345/api/entry",
+			"description": "",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"responses": [],
+			"rawModeData": "{\n\t\"first_name\":\"abc\",\n\t\"last_name\":\"def\",\n\t\"email_address\":\"abc.def@g.com\",\n\t\"phone_number\":\"3231239009\",\n}"
+		},
+		{
+			"id": "9ee13aa6-676e-a17f-561d-003ef3473e25",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:12345/api/entry?id=2",
+			"queryParams": [
+				{
+					"key": "id",
+					"value": "2",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1548034269811,
+			"name": "Get Entry: http://localhost:12345/api/entry?id=1",
+			"description": "",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"responses": []
+		},
+		{
+			"id": "9f5d12d4-451c-50fb-975a-8abf5b610cc9",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:12345/api/entry?id=2",
+			"queryParams": [
+				{
+					"key": "id",
+					"value": "2",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "DELETE",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1548056900794,
+			"name": "Delete Entry: http://localhost:12345/api/entry?id=32",
+			"description": "",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"responses": []
+		},
+		{
+			"id": "f067b75d-c06f-94d5-f880-72c30a811901",
+			"headers": "//Content-Type: multipart/form-data\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "multipart/form-data",
+					"description": "",
+					"enabled": false
+				}
+			],
+			"url": "http://localhost:12345/api/upload-entries-CSV",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [
+				{
+					"key": "csvFile",
+					"value": "address-book-1548037313.csv",
+					"description": "",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1548056935165,
+			"name": "Upload CSV: http://localhost:12345/api/upload-entries-csv",
+			"description": "",
+			"collectionId": "c17ce7e0-4b3a-6c82-22a0-8e10d3e35bb3",
+			"responses": []
+		}
+	]
+}
